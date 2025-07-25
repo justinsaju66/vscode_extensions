@@ -10,6 +10,7 @@ let disposables: vscode.Disposable[] = [];
 let shareStatusBarItem: vscode.StatusBarItem | undefined;
 let lastSessionUrl: string | undefined;
 let applyingRemoteUpdate = false;
+let yjsChangeTimeout: NodeJS.Timeout | undefined;
 
 const DEFAULT_PUBLIC_WS_URL = 'ws://localhost:1234';
 
@@ -129,31 +130,26 @@ async function setupCollaboration(wsUrl: string, role: string, sessionId: string
 
     // Apply only the actual Yjs changes to the editor
     const yjsChange = () => {
-        vscode.window.showInformationMessage('[CodeWithMe] Yjs document changed!');
-        const editor = vscode.window.activeTextEditor;
-        if (editor && yText) {
-            const current = editor.document.getText();
-            const shared = yText.toString();
-            if (current !== shared) {
-                console.log('[CodeWithMe] Detected remote Yjs change. Updating editor.');
-                applyingRemoteUpdate = true;
-                const edit = new vscode.WorkspaceEdit();
-                const fullRange = new vscode.Range(
-                    editor.document.positionAt(0),
-                    editor.document.positionAt(current.length)
-                );
-                edit.replace(editor.document.uri, fullRange, shared);
-                vscode.workspace.applyEdit(edit).then(() => {
-                    applyingRemoteUpdate = false;
-                    console.log('[CodeWithMe] Applied Yjs change to editor.');
-                });
-            } else {
-                console.log('[CodeWithMe] Yjs change detected but editor already matches shared content.');
+        if (yjsChangeTimeout) clearTimeout(yjsChangeTimeout);
+        yjsChangeTimeout = setTimeout(() => {
+            const editor = vscode.window.activeTextEditor;
+            if (editor && yText) {
+                const current = editor.document.getText();
+                const shared = yText.toString();
+                if (current !== shared) {
+                    applyingRemoteUpdate = true;
+                    const edit = new vscode.WorkspaceEdit();
+                    const fullRange = new vscode.Range(
+                        editor.document.positionAt(0),
+                        editor.document.positionAt(current.length)
+                    );
+                    edit.replace(editor.document.uri, fullRange, shared);
+                    vscode.workspace.applyEdit(edit).then(() => {
+                        applyingRemoteUpdate = false;
+                    });
+                }
             }
-        } else {
-            if (!editor) console.log('[CodeWithMe] No active editor for Yjs change');
-            if (!yText) console.log('[CodeWithMe] yText is not initialized for Yjs change');
-        }
+        }, 100); // 100ms debounce
     };
     yText.observe(yjsChange);
     disposables.push({ dispose: () => yText.unobserve(yjsChange) });
