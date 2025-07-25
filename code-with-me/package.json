@@ -1,0 +1,81 @@
+{
+  "name": "code-with-me",
+  "displayName": "Code with me",
+  "description": "VS Code collaborative extension like Code With Me",
+  "version": "1.2.3",
+  "publisher": "cybrosys",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:code-with-me.sessionActions",
+    "onCommand:code-with-me.joinSession",
+    "onCommand:code-with-me.stopSession",
+    "onCommand:code-with-me.shareSessionLink"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "code-with-me.startSession",
+        "title": "Code with me: Start Session",
+        "category": "Code with me"
+      },
+      {
+        "command": "code-with-me.joinSession",
+        "title": "Code with me: Join Session",
+        "category": "Code with me"
+      },
+      {
+        "command": "code-with-me.stopSession",
+        "title": "Code with me: Stop Session",
+        "category": "Code with me"
+      },
+      {
+        "command": "code-with-me.sessionActions",
+        "title": "Code with me",
+        "category": "Code with me"
+      }
+    ],
+    "menus": {
+      "editor/title": [],
+      "commandPalette": [
+        {
+          "command": "code-with-me.startSession"
+        },
+        {
+          "command": "code-with-me.joinSession"
+        },
+        {
+          "command": "code-with-me.stopSession"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.70.0",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "@vscode/test-cli": "^0.0.11",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "y-websocket": "^1.4.5",
+    "yjs": "^13.5.43"
+  }
+}
